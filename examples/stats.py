@@ -84,7 +84,7 @@ image = Image.new('1', (width, height))
 draw = ImageDraw.Draw(image)
 
 # Draw a black filled box to clear the image.
-draw.rectangle((0,0,width,height), outline=0, fill=0)
+draw.rectangle((0, 0, width, height), outline=0, fill=0)
 
 # Draw some shapes.
 # First define some constants to allow easy resizing of shapes.
@@ -96,7 +96,8 @@ x = 0
 
 
 # Load default font.
-font = ImageFont.load_default()
+# font = ImageFont.load_default()
+font = ImageFont.truetype('retro_computer.ttf', 8)
 
 # Alternatively load a TTF font.  Make sure the .ttf font file is in the same directory as the python script!
 # Some other nice fonts to try: http://www.dafont.com/bitmap.php
@@ -105,24 +106,31 @@ font = ImageFont.load_default()
 while True:
 
     # Draw a black filled box to clear the image.
-    draw.rectangle((0,0,width,height), outline=0, fill=0)
+    draw.rectangle((0, 0, width, height), outline=0, fill=0)
 
     # Shell scripts for system monitoring from here : https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
-    cmd = "hostname -I | cut -d\' \' -f1"
-    IP = subprocess.check_output(cmd, shell = True )
+    cmd = "hostname -I |cut -f 2 -d ' '"
+    IP = subprocess.check_output(cmd, shell=True)
     cmd = "top -bn1 | grep load | awk '{printf \"CPU Load: %.2f\", $(NF-2)}'"
-    CPU = subprocess.check_output(cmd, shell = True )
-    cmd = "free -m | awk 'NR==2{printf \"Mem: %s/%sMB %.2f%%\", $3,$2,$3*100/$2 }'"
-    MemUsage = subprocess.check_output(cmd, shell = True )
+    CPU = subprocess.check_output(cmd, shell=True)
+    cmd = "free -m | awk 'NR==2{printf \"Ram: %s/%sMB %.2f%%\", $3,$2,$3*100/$2 }'"
+    MemUsage = subprocess.check_output(cmd, shell=True)
     cmd = "df -h | awk '$NF==\"/\"{printf \"Disk: %d/%dGB %s\", $3,$2,$5}'"
-    Disk = subprocess.check_output(cmd, shell = True )
+    Disk = subprocess.check_output(cmd, shell=True)
+    cmd = "vcgencmd measure_temp |cut -f 2 -d '='"
+    temp = subprocess.check_output(cmd, shell=True)
 
     # Write two lines of text.
 
-    draw.text((x, top),       "IP: " + str(IP),  font=font, fill=255)
-    draw.text((x, top+8),     str(CPU), font=font, fill=255)
-    draw.text((x, top+16),    str(MemUsage),  font=font, fill=255)
-    draw.text((x, top+25),    str(Disk),  font=font, fill=255)
+    # draw.text((x, top),       "IP: " + str(IP),  font=font, fill=255)
+    # draw.text((x, top+8),     str(CPU), font=font, fill=255)
+    # draw.text((x, top+16),    str(MemUsage),  font=font, fill=255)
+    # draw.text((x, top+25),    str(Disk),  font=font, fill=255)
+
+    draw.text((x, top),         str(CPU, 'utf-8') + " " + str(temp, 'utf-8'), font=font, fill=255)
+    draw.text((x, top+8),       str(MemUsage, 'utf-8'), font=font, fill=255)
+    draw.text((x, top+16),      str(Disk, 'utf-8'), font=font, fill=255)
+    draw.text((x, top+25),      "wlan0: " + str(IP, 'utf-8'), font=font, fill=255)
 
     # Display image.
     disp.image(image)
